@@ -1,3 +1,5 @@
+import os
+from transformers.trainer_callback import TrainerCallback
 from trl import SFTTrainer
 from transformers import (
     AutoTokenizer,
@@ -62,7 +64,7 @@ dataset = hf_dataset
 
 training_args = TrainingArguments(
     "output_dir",
-    per_device_train_batch_size=1,
+    per_device_train_batch_size=64,
     num_train_epochs=10,
     logging_dir="logs",
 )
@@ -76,6 +78,25 @@ trainer = SFTTrainer(
     packing=True,
     args=training_args,
 )
+
+
+class SaveWeightsCallback(TrainerCallback):
+    def on_epoch_end(self, args, state, control, **kwargs):
+        model_to_save = state.trainer.model
+        output_dir = os.path.join(args.output_dir, f"epoch_{state.epoch}")
+        os.makedirs(output_dir, exist_ok=True)
+        model_to_save.save_pretrained(output_dir)
+        self.save_optimizer_and_scheduler(output_dir, state)
+
+    def save_optimizer_and_scheduler(self, output_dir, state):
+        state.trainer.optimizer.save_pretrained(output_dir)
+        state.trainer.lr_scheduler.save_pretrained(output_dir)
+
+
+trainer.add_callback(SaveWeightsCallback())
+
+trainer.train()
+
 
 trainer.train()
 model.save_pretrained("ura-finetuned")
