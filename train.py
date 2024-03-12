@@ -30,7 +30,6 @@ quantization_config = BitsAndBytesConfig(
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     device_map="auto",
-    load_in_4bit=True,
     quantization_config=quantization_config,
 )
 model = prepare_model_for_kbit_training(model)
