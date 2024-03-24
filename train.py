@@ -80,23 +80,4 @@ trainer = SFTTrainer(
 )
 
 
-class SaveWeightsCallback(TrainerCallback):
-    def on_epoch_end(self, args, state, control, **kwargs):
-        model_to_save = state.trainer.model
-        output_dir = os.path.join(args.output_dir, f"epoch_{state.epoch}")
-        os.makedirs(output_dir, exist_ok=True)
-        model_to_save.save_pretrained(output_dir)
-        self.save_optimizer_and_scheduler(output_dir, state)
-
-    def save_optimizer_and_scheduler(self, output_dir, state):
-        state.trainer.optimizer.save_pretrained(output_dir)
-        state.trainer.lr_scheduler.save_pretrained(output_dir)
-
-
-trainer.add_callback(SaveWeightsCallback())
-
 trainer.train()
-
-
-trainer.train()
-model.save_pretrained("ura-finetuned")
