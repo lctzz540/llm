@@ -1,6 +1,4 @@
-import os
-from transformers.trainer_callback import TrainerCallback
-from trl import SFTTrainer
+from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -9,26 +7,29 @@ from transformers import (
 )
 import pandas as pd
 from datasets import Dataset
-from huggingface_hub import login
 import torch
 from peft import prepare_model_for_kbit_training, LoraConfig, TaskType, get_peft_model
 
 
-login()
-
 model_id = "ura-hcmut/ura-llama-7b"
 
 
-def convert_to_hf_dataset(example):
-    return {"text": example["text"]}
+def formatting_prompts_func(example):
+    output_texts = []
+    for i in range(len(example['query'])):
+        text = f"### Question: {example['query'][i]}\n ### Answer: {example['answer'][i]}"
+        output_texts.append(text)
+    return output_texts
 
 
 hf_dataset = Dataset.from_pandas(pd.read_csv("./data.csv"))
-hf_dataset = hf_dataset.map(convert_to_hf_dataset)
+
+response_template = "### Answer:"
 
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16, bb_4bit_quant_type="nf4"
 )
+
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     device_map="auto",
@@ -53,6 +54,9 @@ lora_config = LoraConfig(
 
 model = get_peft_model(model, lora_config)
 
+
+
+
 model.config.pretraining_tp = 1
 model.eval()
 
@@ -60,22 +64,24 @@ model.eval()
 tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 
+collator = DataCollatorForCompletionOnlyLM(
+    response_template, tokenizer=tokenizer)
 dataset = hf_dataset
 
 training_args = TrainingArguments(
     "output_dir",
-    per_device_train_batch_size=64,
-    num_train_epochs=10,
+    per_device_train_batch_size=32,
+    num_train_epochs=1,
     logging_dir="logs",
 )
 
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
-    dataset_text_field="text",
+    formatting_func=formatting_prompts_func,
+    data_collator=collator,
     max_seq_length=512,
     tokenizer=tokenizer,
-    packing=True,
     args=training_args,
 )
 
