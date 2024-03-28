@@ -11,7 +11,7 @@ import torch
 from peft import prepare_model_for_kbit_training, LoraConfig, TaskType, get_peft_model
 
 
-model_id = "ura-hcmut/ura-llama-7b"
+model_id = "ura-hcmut/GemSUra-7B"
 
 
 def formatting_prompts_func(example):
@@ -22,7 +22,7 @@ def formatting_prompts_func(example):
     return output_texts
 
 
-hf_dataset = Dataset.from_pandas(pd.read_csv("./data.csv"))
+hf_dataset = load_dataset("bunbo", split="train")
 
 response_template = "### Answer:"
 
