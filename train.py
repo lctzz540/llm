@@ -22,7 +22,7 @@ def formatting_prompts_func(example):
     return output_texts
 
 
-hf_dataset = load_dataset("bunbo", split="train")
+hf_dataset = load_dataset("lctzz540/bunbo", split="train")
 
 response_template = "### Answer:"
 
