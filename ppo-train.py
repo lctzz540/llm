@@ -5,11 +5,6 @@ from trl import PPOConfig
 from datasets import load_dataset
 from transformers import AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead, PPOTrainer
-import subprocess
-
-package_name = "trl peft bitsandbytes"
-
-subprocess.call(["pip", "install", package_name])
 
 
 dataset = load_dataset("lctzz540/bunbo", split="train")
@@ -18,8 +13,8 @@ tokenizer = AutoTokenizer.from_pretrained("ura-hcmut/GemSUra-7B")
 config = PPOConfig(
     model_name="lctzz540/bunbomerged",
     learning_rate=1.41e-5,
-    batch_size=4,
-    mini_batch_size=4,
+    batch_size=1,
+    mini_batch_size=1,
 )
 model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
 
