@@ -1,10 +1,10 @@
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-from transformers import AutoModelForSequenceClassification
-from trl import PPOConfig
+from transformers import GemmaForCausalLM, AutoModelForSequenceClassification
+from trl import PPOConfig, AutoModelForCausalLMWithValueHead
 from datasets import load_dataset
-from transformers import AutoTokenizer, T5ForConditionalGeneration
+from transformers import AutoTokenizer
 from trl import AutoModelForSeq2SeqLMWithValueHead, PPOTrainer, create_reference_model
 from peft import LoraConfig, TaskType, get_peft_model
 from trl.core import LengthSampler
@@ -54,12 +54,11 @@ def collator(data):
 
 
 def peft_model_ppo(policy_model_path):
-    policy_model = T5ForConditionalGeneration.from_pretrained(policy_model_path, device_map="auto")
+    policy_model = GemmaForCausalLM.from_pretrained(policy_model_path, device_map="auto")
     policy_model.to(device)
     lora_config = LoraConfig(
         r=2,
-        lora_alpha=4,
-        target_modules=["q", "v"],
+        lora_alpha=2,
         lora_dropout=0.10,
         bias="none",
         task_type=TaskType.SEQ_2_SEQ_LM,
@@ -93,8 +92,8 @@ model, ref = peft_model_ppo(config.model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
 rm_model = AutoModelForSequenceClassification.from_pretrained(
-    "./checkpoint-500", device_map="auto", ignore_mismatched_sizes=True
-)
+    "lctzz540/bbr", ignore_mismatched_sizes=True
+).to(device)
 
 
 def tokenize(sample):
