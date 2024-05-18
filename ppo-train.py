@@ -169,4 +169,4 @@ for step, batch in tqdm(enumerate(ppo_trainer.dataloader)):
     print(f'ppo/returns/mean: {stats["ppo/returns/mean"]}')
     print(f'ppo/policy/advantages_mean: {stats["ppo/policy/advantages_mean"]}')
     print("-".join("" for x in range(100)))
-ppo_trainer.save_model("ppo_model")
+ppo_trainer.save_pretrained("ppo_model")
