@@ -7,6 +7,7 @@ from transformers import (
 )
 import pandas as pd
 from datasets import Dataset
+from datasets import load_dataset
 import torch
 from peft import prepare_model_for_kbit_training, LoraConfig, TaskType, get_peft_model
 
