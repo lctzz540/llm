@@ -18,7 +18,7 @@ model_id = "ura-hcmut/GemSUra-7B"
 def formatting_prompts_func(example):
     output_texts = []
     for i in range(len(example['query'])):
-        text = f"### Question: {example['query'][i]}\n ### Answer: {example['answer'][i]}"
+        text = f"### Instruction: Bạn là trợ lý chuyên nghiệp trong việc viết nội dung rao bán bất động sản trên facebook, hãy viết dựa vào thông tin được cung cấp như sau ### Question: {example['query'][i]}\n ### Answer: {example['answer'][i]}"
         output_texts.append(text)
     return output_texts
 
