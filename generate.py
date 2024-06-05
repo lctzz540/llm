@@ -11,7 +11,6 @@ query_data = dataset["train"]["query"][:10000]
 
 llm = LLM(model="llamappo", enable_lora=True, gpu_memory_utilization=0.8)
 
-# Define sampling parameters
 sampling_params_1 = SamplingParams(temperature=1, max_tokens=256, top_p=0.8)
 sampling_params_2 = SamplingParams(temperature=0.9, max_tokens=256, top_p=0.95)
 
